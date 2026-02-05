@@ -14,8 +14,7 @@ export default function LoginPage() {
         <SignInButton />
 
         <p className="text-xs text-black/40">
-          If you hit an error, confirm the Vercel env vars: GOOGLE_CLIENT_ID,
-          GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET, NEXTAUTH_URL.
+          If you hit an error, check the deployment logs in Vercel.
         </p>
       </main>
     </div>
