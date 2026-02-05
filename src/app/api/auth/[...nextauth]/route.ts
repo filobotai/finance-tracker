@@ -1,19 +1,6 @@
-import { NextResponse } from "next/server";
+import NextAuth from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-// Auth is not wired yet (the Prisma schema in this repo does not include NextAuth models).
-// Leaving this route as a friendly stub so deployments work out of the box.
+const handler = NextAuth(authOptions);
 
-export async function GET() {
-  return NextResponse.json(
-    {
-      ok: false,
-      message:
-        "Auth is not configured in this project yet. This endpoint is a stub.",
-    },
-    { status: 501 },
-  );
-}
-
-export async function POST() {
-  return GET();
-}
+export { handler as GET, handler as POST };

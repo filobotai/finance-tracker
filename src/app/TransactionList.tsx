@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { deleteTransaction } from "./actions";
 
 function formatEur(cents: number) {
@@ -8,16 +10,15 @@ function formatEur(cents: number) {
 }
 
 export async function TransactionList() {
-  const userEmail = (process.env.DEMO_EMAIL || "demo@finance-tracker.local").toLowerCase();
-  const user = await prisma.user.findUnique({ where: { email: userEmail } });
+  const session = await getServerSession(authOptions);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) return null;
 
-  const txs = user
-    ? await prisma.transaction.findMany({
-        where: { userId: user.id },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-      })
-    : [];
+  const txs = await prisma.transaction.findMany({
+    where: { userId },
+    orderBy: { occurredAt: "desc" },
+    take: 50,
+  });
 
   if (!txs.length) {
     return (
@@ -54,7 +55,7 @@ export async function TransactionList() {
                 ) : null}
               </div>
               <div className="text-xs text-black/50">
-                {new Date(t.createdAt).toLocaleString()}
+                {new Date(t.occurredAt).toLocaleString()}
               </div>
             </div>
 

@@ -3,9 +3,16 @@
 import { useState, useTransition } from "react";
 import { createTransaction } from "./actions";
 
+function toDatetimeLocalValue(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function AddTransactionForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const now = toDatetimeLocalValue(new Date());
 
   return (
     <form
@@ -56,6 +63,16 @@ export function AddTransactionForm() {
           placeholder="Coffee"
           className="h-10 rounded-lg border border-black/10 bg-white px-3"
           required
+        />
+      </label>
+
+      <label className="grid gap-1">
+        <span className="text-sm text-black/70">When</span>
+        <input
+          type="datetime-local"
+          name="occurredAt"
+          defaultValue={now}
+          className="h-10 rounded-lg border border-black/10 bg-white px-3"
         />
       </label>
 

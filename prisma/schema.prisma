@@ -18,24 +18,32 @@ enum TxType {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  transactions  Transaction[]
+  // NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // app data
+  transactions Transaction[]
 }
 
 model Transaction {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) // audit: when row was created
+  updatedAt DateTime @updatedAt
+
+  // When the transaction actually happened (user-editable)
+  occurredAt DateTime @default(now())
 
   // Stored in cents to avoid float issues
   amountCents Int
-  currency    Currency  @default(EUR)
+  currency    Currency @default(EUR)
   type        TxType
 
   description String
@@ -43,9 +51,47 @@ model Transaction {
   payment     String?
 
   // owner
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
+  @@index([userId, occurredAt])
   @@index([userId, category])
+}
+
+// --- NextAuth.js models (Prisma Adapter) ---
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
