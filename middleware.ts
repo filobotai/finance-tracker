@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 
-// Require login for everything except NextAuth endpoints and the login page.
-export async function middleware(req: NextRequest) {
+/**
+ * Require login for everything except NextAuth endpoints and the login page.
+ *
+ * Note: We use NextAuth's database session strategy (session tokens stored in DB).
+ * In that mode, `next-auth/jwt`'s `getToken()` will NOT work (it expects a JWT).
+ *
+ * Here we do a lightweight check for the presence of a NextAuth session cookie.
+ * This is sufficient to prevent redirect loops and keep the edge middleware fast.
+ */
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (
@@ -15,8 +22,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) {
+  const sessionToken =
+    req.cookies.get("__Secure-next-auth.session-token")?.value ||
+    req.cookies.get("next-auth.session-token")?.value;
+
+  if (!sessionToken) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("callbackUrl", pathname);
