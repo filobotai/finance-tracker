@@ -6,7 +6,8 @@ export function SignInButton() {
   return (
     <button
       className="h-10 rounded-lg bg-black px-4 text-sm font-medium text-white"
-      onClick={() => signIn("google")}
+      type="button"
+      onClick={() => signIn("google", { callbackUrl: "/" })}
     >
       Continue with Google
     </button>
