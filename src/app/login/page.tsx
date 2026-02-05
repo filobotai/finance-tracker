@@ -12,10 +12,6 @@ export default function LoginPage() {
         </header>
 
         <SignInButton />
-
-        <p className="text-xs text-black/40">
-          If you hit an error, check the deployment logs in Vercel.
-        </p>
       </main>
     </div>
   );
