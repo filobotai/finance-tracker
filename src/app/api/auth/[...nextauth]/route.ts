@@ -1,36 +1,19 @@
-import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
-import { parseAllowedEmails, requiredEnv } from "@/lib/env";
+// Auth is not wired yet (the Prisma schema in this repo does not include NextAuth models).
+// Leaving this route as a friendly stub so deployments work out of the box.
 
-const allowed = parseAllowedEmails();
-
-const handler = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    GoogleProvider({
-      clientId: requiredEnv("GOOGLE_CLIENT_ID"),
-      clientSecret: requiredEnv("GOOGLE_CLIENT_SECRET"),
-    }),
-  ],
-  callbacks: {
-    async signIn({ user }) {
-      const email = user.email?.toLowerCase();
-      if (!email) return false;
-      if (allowed.size === 0) return true; // if not set, allow any Google user
-      return allowed.has(email);
+export async function GET() {
+  return NextResponse.json(
+    {
+      ok: false,
+      message:
+        "Auth is not configured in this project yet. This endpoint is a stub.",
     },
-    async session({ session, user }) {
-      // attach userId
-      if (session.user) {
-        (session.user as any).id = user.id;
-      }
-      return session;
-    },
-  },
-  session: { strategy: "database" },
-});
+    { status: 501 },
+  );
+}
 
-export { handler as GET, handler as POST };
+export async function POST() {
+  return GET();
+}
