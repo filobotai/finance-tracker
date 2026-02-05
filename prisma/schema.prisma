@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Currency {
+  EUR
+}
+
+enum TxType {
+  EXPENSE
+  INCOME
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Stored in cents to avoid float issues
+  amountCents Int
+  currency    Currency  @default(EUR)
+  type        TxType
+
+  description String
+  category    String?
+  payment     String?
+
+  // owner
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, category])
+}
