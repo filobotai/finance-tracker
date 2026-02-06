@@ -20,11 +20,14 @@ export function AddTransactionForm() {
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);
-        const fd = new FormData(e.currentTarget);
+
+        const form = e.currentTarget;
+        const fd = new FormData(form);
+
         startTransition(async () => {
           try {
             await createTransaction(fd);
-            e.currentTarget.reset();
+            form.reset();
           } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
           }

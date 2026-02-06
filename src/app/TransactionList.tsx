@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteTransaction } from "./actions";
+import { DeleteTransactionForm } from "./DeleteTransactionForm";
 
 function formatEur(cents: number) {
   const sign = cents < 0 ? "-" : "";
@@ -64,14 +65,15 @@ export async function TransactionList() {
                 {sign > 0 ? "+" : "-"}
                 {formatEur(t.amountCents)}
               </div>
-              <form
+              <DeleteTransactionForm
+                label={`“${t.description}” (${t.type.toLowerCase()} ${sign > 0 ? "+" : "-"}${formatEur(
+                  t.amountCents,
+                )})`}
                 action={async () => {
                   "use server";
                   await deleteTransaction(t.id);
                 }}
-              >
-                <button className="text-xs text-black/50 hover:text-black">Delete</button>
-              </form>
+              />
             </div>
           </li>
         );
